@@ -24,7 +24,7 @@ jobs:
       - name: Download & decompress FCOS OpenStack image
         run: |
           docker run --rm -v $PWD:/data quay.io/coreos/coreos-installer:release \
-            download -s $STREAM -p openstack -f qcow2.xz --decompress -o /data/${IMAGE_NAME}
+            download -s $STREAM -p openstack -f qcow2.xz --decompress -C /data/${IMAGE_NAME}
 
       - name: Set up NBD
         run: |
