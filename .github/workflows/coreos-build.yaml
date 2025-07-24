@@ -1,0 +1,64 @@
+name: Build FCOS BYOL Image
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  STREAM: stable
+  IMAGE_NAME: fcos-byol.qcow2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install QEMU & XZ
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y qemu-utils xz-utils
+
+      - name: Download & decompress FCOS OpenStack image
+        run: |
+          docker run --rm -v $PWD:/data quay.io/coreos/coreos-installer:release \
+            download -s $STREAM -p openstack -f qcow2.xz --decompress -o /data/${IMAGE_NAME}
+
+      - name: Set up NBD
+        run: |
+          sudo modprobe nbd max_part=8
+
+      - name: Mount the image
+        run: |
+          sudo qemu-nbd --connect=/dev/nbd0 ${IMAGE_NAME}
+          sleep 5
+          sudo mkdir -p mnt
+          sudo mount /dev/nbd0p1 mnt
+
+      - name: Inject OVH BYOL boot script
+        run: |
+          sudo mkdir -p mnt/root/.ovh
+          cat <<'EOF' | sudo tee mnt/root/.ovh/make_image_bootable.sh
+          #!/bin/bash
+          set -e
+          /usr/bin/coreos-installer install /dev/sda \
+            --ignition-url "${{ secrets.IGNITION_URL }}"
+          sudo chmod +x mnt/root/.ovh/make_image_bootable.sh
+
+      - name: Unmount & disconnect NBD
+        run: |
+          sudo umount mnt
+          sudo qemu-nbd --disconnect /dev/nbd0
+          rm -rf mnt
+
+      - name: Compress QCOW2 for upload
+        run: |
+          xz -T0 -9 ${IMAGE_NAME}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${IMAGE_NAME}.xz
+          path: ${IMAGE_NAME}.xz
