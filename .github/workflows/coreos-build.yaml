@@ -45,12 +45,30 @@ jobs:
         run: |
           sudo modprobe nbd max_part=8
 
+      - name: Verify NBD partitions
+        run: |
+          sudo lsblk
+          sudo fdisk -l /dev/nbd0
+
+      - name: Check filesystem type
+        run: |
+          sudo blkid /dev/nbd0p1 || echo "Filesystem not found"
+
+      - name: Install filesystem tools
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y e2fsprogs xfsprogs
+
+      - name: Format the partition (if needed)
+        run: |
+          sudo mkfs.ext4 /dev/nbd0p1 || echo "Partition already formatted"
+
       - name: Mount the image
         run: |
           sudo qemu-nbd --connect=/dev/nbd0 ${IMAGE_NAME}
           sleep 5
           sudo mkdir -p mnt
-          sudo mount /dev/nbd0p1 mnt
+          sudo mount -t ext4 /dev/nbd0p1 mnt
 
       - name: Inject OVH BYOL boot script
         run: |
