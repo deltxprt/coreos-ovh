@@ -16,17 +16,30 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - name: Cache apt packages
+        uses: actions/cache@v3
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-cache
+          restore-keys: |
+            ${{ runner.os }}-apt-cache
+
       - name: Install QEMU & XZ
         run: |
-          sudo apt-get update
+          sudo apt-get update && \
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y qemu-utils xz-utils
 
       - name: Download & decompress FCOS OpenStack image
+        timeout-minutes: 10
         run: |
+          set -e
           docker run --rm -v $PWD:/data quay.io/coreos/coreos-installer:release \
-            download -s $STREAM -p openstack -f qcow2.xz --decompress -C /data/ &&
-            COREOSIMAGE=$(find /data -type f -name "*.qcow2*") &&
-            mv $COREOSIMAGE ${IMAGE_NAME}
+            download -s $STREAM -p openstack -f qcow2.xz --decompress -C /data/ || \
+            { echo "Failed to download and decompress image"; exit 1; }
+          COREOSIMAGE=$(find /data -type f -name "*.qcow2*") || \
+            { echo "Image not found"; exit 1; }
+          echo "Found image: $COREOSIMAGE"
+          mv $COREOSIMAGE ${IMAGE_NAME}
 
       - name: Set up NBD
         run: |
@@ -47,6 +60,7 @@ jobs:
           set -e
           /usr/bin/coreos-installer install /dev/sda \
             --ignition-url "${{ secrets.IGNITION_URL }}"
+          EOF
           sudo chmod +x mnt/root/.ovh/make_image_bootable.sh
 
       - name: Unmount & disconnect NBD
@@ -59,8 +73,19 @@ jobs:
         run: |
           xz -T0 -9 ${IMAGE_NAME}
 
+      - name: Validate QCOW2 Image
+        run: |
+          if [ ! -f "${IMAGE_NAME}.xz" ]; then
+            echo "Compressed QCOW2 image not found!"
+            exit 1
+          fi
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${IMAGE_NAME}.xz
+          name: fcos-byol-${{ github.run_id }}.qcow2.xz
           path: ${IMAGE_NAME}.xz
+
+      - name: Cleanup
+        run: |
+          rm -rf mnt ${IMAGE_NAME}
