@@ -107,3 +107,32 @@ jobs:
       - name: Cleanup
         run: |
           rm -rf mnt ${IMAGE_NAME}
+
+      - name: Verify Image File
+        run: |
+          if [ ! -f "${IMAGE_NAME}" ]; then
+            echo "Image file not found: ${IMAGE_NAME}"
+            exit 1
+          fi
+          qemu-img info ${IMAGE_NAME} || { echo "Invalid image file"; exit 1; }
+
+      - name: Decompress Image
+        run: |
+          if [ -f "${IMAGE_NAME}.xz" ]; then
+            xz -d ${IMAGE_NAME}.xz || { echo "Failed to decompress image"; exit 1; }
+          fi
+
+      - name: Connect Image to NBD
+        run: |
+          sudo qemu-nbd --connect=/dev/nbd0 ${IMAGE_NAME} || \
+          { echo "Failed to connect image to /dev/nbd0"; exit 1; }
+          sleep 5
+
+      - name: Verify NBD Connection
+        run: |
+          sudo lsblk /dev/nbd0 || \
+          { echo "/dev/nbd0 is not connected"; exit 1; }
+
+      - name: Check Kernel Logs
+        run: |
+          dmesg | tail -n 50
