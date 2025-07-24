@@ -2,7 +2,7 @@ name: Build FCOS BYOL Image
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 env:
@@ -36,7 +36,7 @@ jobs:
           docker run --rm -v $PWD:/data quay.io/coreos/coreos-installer:release \
             download -s $STREAM -p openstack -f qcow2.xz --decompress -C /data/ || \
             { echo "Failed to download and decompress image"; exit 1; }
-          COREOSIMAGE=$(find /data -type f -name "*.qcow2*") || \
+          COREOSIMAGE=$(find $PWD -type f -name "*.qcow2*") || \
             { echo "Image not found"; exit 1; }
           echo "Found image: $COREOSIMAGE"
           mv $COREOSIMAGE ${IMAGE_NAME}
