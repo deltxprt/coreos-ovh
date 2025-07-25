@@ -41,98 +41,18 @@ jobs:
           echo "Found image: $COREOSIMAGE"
           mv $COREOSIMAGE ${IMAGE_NAME}
 
-      - name: Set up NBD
+      - name: Build with packer
         run: |
-          sudo modprobe nbd max_part=8
-
-      - name: Verify NBD partitions
-        run: |
-          sudo lsblk
-          sudo fdisk -l /dev/nbd0
-
-      - name: Check filesystem type
-        run: |
-          sudo blkid /dev/nbd0p1 || echo "Filesystem not found"
-
-      - name: Install filesystem tools
-        run: |
-          sudo apt-get update && \
-          sudo apt-get install -y e2fsprogs xfsprogs
-
-      - name: Format the partition (if needed)
-        run: |
-          sudo mkfs.ext4 /dev/nbd0p1 || echo "Partition already formatted"
-
-      - name: Mount the image
-        run: |
-          sudo qemu-nbd --connect=/dev/nbd0 ${IMAGE_NAME}
-          sleep 5
-          sudo mkdir -p mnt
-          sudo mount -t ext4 /dev/nbd0p1 mnt
-
-      - name: Inject OVH BYOL boot script
-        run: |
-          sudo mkdir -p mnt/root/.ovh
-          cat <<'EOF' | sudo tee mnt/root/.ovh/make_image_bootable.sh
-          #!/bin/bash
-          set -e
-          /usr/bin/coreos-installer install /dev/sda \
-            --ignition-url "${{ secrets.IGNITION_URL }}"
-          EOF
-          sudo chmod +x mnt/root/.ovh/make_image_bootable.sh
-
-      - name: Unmount & disconnect NBD
-        run: |
-          sudo umount mnt
-          sudo qemu-nbd --disconnect /dev/nbd0
-          rm -rf mnt
-
-      - name: Compress QCOW2 for upload
-        run: |
-          xz -T0 -9 ${IMAGE_NAME}
-
-      - name: Validate QCOW2 Image
-        run: |
-          if [ ! -f "${IMAGE_NAME}.xz" ]; then
-            echo "Compressed QCOW2 image not found!"
-            exit 1
-          fi
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+          sudo apt list -a packer
+          sudo apt install -y --no-install-recommends packer \
+             qemu-system-x86 qemu-utils guestfs-tools genisoimage
+          packer plugins install github.com/hashicorp/qemu
+          PACKER_LOG=1 packer build -parallel-builds=1 deb11k6.json
+          cd output; sha512sum fcos-byol.qcow2 > SHA512SUMS
+      - name: GH Release
+        uses: softprops/action-gh-release@v0.1.15
+#        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: fcos-byol-${{ github.run_id }}.qcow2.xz
-          path: ${IMAGE_NAME}.xz
-
-      - name: Cleanup
-        run: |
-          rm -rf mnt ${IMAGE_NAME}
-
-      - name: Verify Image File
-        run: |
-          if [ ! -f "${IMAGE_NAME}" ]; then
-            echo "Image file not found: ${IMAGE_NAME}"
-            exit 1
-          fi
-          qemu-img info ${IMAGE_NAME} || { echo "Invalid image file"; exit 1; }
-
-      - name: Decompress Image
-        run: |
-          if [ -f "${IMAGE_NAME}.xz" ]; then
-            xz -d ${IMAGE_NAME}.xz || { echo "Failed to decompress image"; exit 1; }
-          fi
-
-      - name: Connect Image to NBD
-        run: |
-          sudo qemu-nbd --connect=/dev/nbd0 ${IMAGE_NAME} || \
-          { echo "Failed to connect image to /dev/nbd0"; exit 1; }
-          sleep 5
-
-      - name: Verify NBD Connection
-        run: |
-          sudo lsblk /dev/nbd0 || \
-          { echo "/dev/nbd0 is not connected"; exit 1; }
-
-      - name: Check Kernel Logs
-        run: |
-          dmesg | tail -n 50
+          files: |
+            output/fcos-byol.qcow2
+            output/SHA512SUMS
