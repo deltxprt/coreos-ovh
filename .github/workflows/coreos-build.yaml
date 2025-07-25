@@ -35,14 +35,6 @@ jobs:
     - name: Generate checksum
       run: sha512sum fcos-byol.qcow2 | cut -d' ' -f1 > fcos-byol.sha512
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: v${{ github.run_number }}
-        name:   FCOS-BYOL v${{ github.run_number }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Upload assets
       uses: softprops/action-gh-release@v2
       with:
