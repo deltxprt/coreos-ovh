@@ -1,4 +1,4 @@
-name: Build & Release FCOS BYOLinux
+name: Build & Release
 on:
   push:
     branches: [ main ]
