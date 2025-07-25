@@ -10,24 +10,48 @@ env:
   IMAGE_NAME: fcos-byol.qcow2
 
 jobs:
-  build:
+  build-artifact:
+    name: Build
+    runs-on: ubuntu-latest
+    outputs:
+      version_fingerprint: ${{ steps.hcp.outputs.version_fingerprint }}
+    steps:
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@main
+        id: setup
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Packer Init
+        run: packer init .
+
+      - name: Packer Build - Branches
+        if: startsWith(github.ref, 'refs/heads/')
+        run: packer build .
+
+      - name: Packer Build - Tags
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: HCP_PACKER_BUILD_FINGERPRINT=$(date +'%m%d%YT%H%M%S') packer build .
+
+
+      - name: Get HCP Packer version fingerprint from Packer Manifest
+        id: hcp
+        run: |
+          last_run_uuid=$(jq -r '.last_run_uuid' "./packer_manifest.json")
+          build=$(jq -r '.builds[] | select(.packer_run_uuid == "'"$last_run_uuid"'")' "./packer_manifest.json")
+          version_fingerprint=$(echo "$build" | jq -r '.custom_data.version_fingerprint')
+          echo "::set-output name=version_fingerprint::$version_fingerprint"
+  update-hcp-packer-channel:
+    name: Update HCP Packer channel
+    needs: ["build-artifact"]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Build with packer
+      - name: Create and set channel
+        working-directory: .github/scripts
         run: |
-          sudo apt list -a packer
-          sudo apt install -y --no-install-recommends packer \
-             qemu-system-x86 qemu-utils guestfs-tools genisoimage
-          packer plugins install github.com/hashicorp/qemu
-          PACKER_LOG=1 packer build -parallel-builds=1 deb11k6.json
-          cd output; sha512sum fcos-byol.qcow2 > SHA512SUMS
-      - name: GH Release
-        uses: softprops/action-gh-release@v0.1.15
-#        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: |
-            output/fcos-byol.qcow21
-            output/SHA512SUMS
+          channel_name=$( echo ${{github.ref_name}} | sed 's/\./-/g')
+          ./create_channel_version.sh $HCP_BUCKET_NAME $channel_name "${{ needs.build-artifact.outputs.version_fingerprint }}"
