@@ -16,31 +16,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Cache apt packages
-        uses: actions/cache@v3
-        with:
-          path: /var/cache/apt
-          key: ${{ runner.os }}-apt-cache
-          restore-keys: |
-            ${{ runner.os }}-apt-cache
-
-      - name: Install QEMU & XZ
-        run: |
-          sudo apt-get update && \
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y qemu-utils xz-utils
-
-      - name: Download & decompress FCOS OpenStack image
-        timeout-minutes: 10
-        run: |
-          set -e
-          docker run --rm -v $PWD:/data quay.io/coreos/coreos-installer:release \
-            download -s $STREAM -p openstack -f qcow2.xz --decompress -C /data/ || \
-            { echo "Failed to download and decompress image"; exit 1; }
-          COREOSIMAGE=$(find $PWD -type f -name "*.qcow2*") || \
-            { echo "Image not found"; exit 1; }
-          echo "Found image: $COREOSIMAGE"
-          mv $COREOSIMAGE ${IMAGE_NAME}
-
       - name: Build with packer
         run: |
           sudo apt list -a packer
@@ -54,5 +29,5 @@ jobs:
 #        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            output/fcos-byol.qcow2
+            output/fcos-byol.qcow21
             output/SHA512SUMS
