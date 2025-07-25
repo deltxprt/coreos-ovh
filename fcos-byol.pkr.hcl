@@ -15,7 +15,7 @@ variable "ignition_url" {
 source "qemu" "fcos_openstack" {
   format         = "qcow2"
   qemu_binary    = "qemu-system-x86_64"
-  accelerator    = ["kvm"]
+  accelerator    = "kvm"
   headless       = true
 
   iso_url           =  "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/42.20250705.3.0/x86_64/fedora-coreos-42.20250705.3.0-openstack.x86_64.qcow2.xz"
