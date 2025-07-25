@@ -28,7 +28,7 @@ jobs:
 
       - name: Packer Build - Branches
         if: startsWith(github.ref, 'refs/heads/')
-        run: packer build .
+        run: packer build -var "ignition_url=${{ secrets.IGNITION_URL }}" .
 
       - name: Packer Build - Tags
         if: startsWith(github.ref, 'refs/tags/v')
