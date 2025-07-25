@@ -20,7 +20,6 @@ source "qemu" "fcos_openstack" {
 
   iso_url           =  "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/42.20250705.3.0/x86_64/fedora-coreos-42.20250705.3.0-openstack.x86_64.qcow2.xz"
   iso_checksum      = "sha256:724208ad91016c3e0d03b97f71b9ecb67a65fede4a470199c0c91a9989c2ba89"
-  output_path    = "fcos-byol.qcow2"
   disk_interface = "scsi"
 }
 
