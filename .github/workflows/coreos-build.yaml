@@ -24,7 +24,7 @@ jobs:
     - name: Generate checksum
       run: sha512sum fcos-byol.qcow2 | cut -d' ' -f1 > ./image/fcos-byol.sha512 
     
-    - uses: shallwefootball/s3-upload-action@v1
+    - uses: shallwefootball/s3-upload-action@v1.3.0
       with:
         aws_key_id: ${{ secrets.AWS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
