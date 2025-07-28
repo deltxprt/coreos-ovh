@@ -30,4 +30,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: fcos-byol.sha512
+        path: fcos-byol.sha512
 
