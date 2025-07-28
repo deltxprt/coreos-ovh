@@ -30,4 +30,4 @@ jobs:
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
         aws_bucket: ${{ secrets.AWS_BUCKET }}
         endpoint: ${{ secrets.AWS_ENDPOINT }}
-        source_dir: '$PWD/image'
+        source_dir: $PWD/image
