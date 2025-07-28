@@ -16,22 +16,8 @@ jobs:
 
     - name: Download FCOS raw
       run: |
-        curl -o fcos-metal.raw.xz https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/42.20250705.3.0/x86_64/fedora-coreos-42.20250705.3.0-metal.x86_64.raw.xz
-        xz -d fcos-metal.raw.xz
-
-    - name: Convert to qcow2
-      run: qemu-img convert -f raw -O qcow2 fcos-metal.raw fcos-byol.qcow2
-
-    - name: Add OVH boot script
-      run: |
-        cat > make_image_bootable.sh <<'EOF'
-        #!/bin/bash
-        mount /dev/sda1 /mnt
-        grub2-install --boot-directory=/mnt/boot /dev/sda
-        grub2-mkconfig -o /mnt/boot/grub2/grub.cfg
-        EOF
-        chmod +x make_image_bootable.sh
-
+        curl -o fcos-byol.qcow2.xz https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/42.20250705.3.0/x86_64/fedora-coreos-42.20250705.3.0-openstack.x86_64.qcow2.xz
+        xz -dv fcos-byol.qcow2.xz
     - name: Generate checksum
       run: sha512sum fcos-byol.qcow2 | cut -d' ' -f1 > fcos-byol.sha512
 
@@ -40,5 +26,4 @@ jobs:
       with:
         files: |
           fcos-byol.qcow2
-          make_image_bootable.sh
           fcos-byol.sha512
