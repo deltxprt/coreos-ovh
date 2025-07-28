@@ -15,14 +15,14 @@ jobs:
       run: sudo apt update && sudo apt install -y jq xz-utils qemu-utils
 
     - name: Create image directory
-      run: mkdir -p ./image
+      run: mkdir -p $PWD/image
 
     - name: Download FCOS raw
       run: |
-        curl -o ./image/fcos-byol.qcow2.xz https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/42.20250705.3.0/x86_64/fedora-coreos-42.20250705.3.0-openstack.x86_64.qcow2.xz
-        xz -dv fcos-byol.qcow2.xz
+        curl -o $PWD/image/fcos-byol.qcow2.xz https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/42.20250705.3.0/x86_64/fedora-coreos-42.20250705.3.0-openstack.x86_64.qcow2.xz
+        xz -dv $PWD/image/fcos-byol.qcow2.xz
     - name: Generate checksum
-      run: sha512sum fcos-byol.qcow2 | cut -d' ' -f1 > ./image/fcos-byol.sha512 
+      run: sha512sum $PWD/image/fcos-byol.qcow2 | cut -d' ' -f1 > $PWD/image/fcos-byol.sha512 
     
     - uses: shallwefootball/s3-upload-action@v1.3.0
       with:
@@ -30,4 +30,4 @@ jobs:
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
         aws_bucket: ${{ secrets.AWS_BUCKET }}
         endpoint: ${{ secrets.AWS_ENDPOINT }}
-        source_dir: './image'
+        source_dir: '$PWD/image'
