@@ -20,10 +20,14 @@ jobs:
         xz -dv fcos-byol.qcow2.xz
     - name: Generate checksum
       run: sha512sum fcos-byol.qcow2 | cut -d' ' -f1 > fcos-byol.sha512 
-
-    - name: Upload assets
-      uses: softprops/action-gh-release@v2
+    
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v4
       with:
-        files: |
-          fcos-byol.qcow2
-          fcos-byol.sha512
+        name: fcos-byol.qcow2
+        path: fcos-byol.qcow2
+    - name: 'Upload Checksum'
+      uses: actions/upload-artifact@v4
+      with:
+        name: fcos-byol.sha512
+
