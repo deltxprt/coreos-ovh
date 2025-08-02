@@ -47,9 +47,9 @@ So if someone who is smarter than me have the solution, let me know i'll gladly 
     1. Take the [config.bu](/config.bu) example file and drop it in your text editor
     2. We need to replace the following placeholders (ordered from top to bottom of the file):
         1. `__username__` : Your Username
-        2. `__password_hash__`: hash of your password (use `mkpasswd`) ([more info](https://coreos.github.io/butane/examples/#using-password-authentication))
+        2. `__password_hash__`: hash of your password (use `mkpasswd`) ([More Information](https://coreos.github.io/butane/examples/#using-password-authentication))
         3. `__public_key__` : your SSH public key for your `__username__`
-        4. `__diskID__` : IDs of your disks (raid 1 with 2 disks in the example) ([more info](https://coreos.github.io/butane/examples/#mirrored-boot-disk))
+        4. `__diskID__` : IDs of your disks (raid 1 with 2 disks in the example) ([More Information](https://coreos.github.io/butane/examples/#mirrored-boot-disk))
             1. example for nvme disks: `ls -l /dev/disk/by-id/ | grep '^.*nvme[[:digit:]][[:alpha:]][[:digit:]]$'`
                 example for regular disks: `ls -l /dev/disk/by-id/ | grep '^.*sd[[:alpha:]]$'`
             2. Choose the one with the disk manufacturer name ex:
