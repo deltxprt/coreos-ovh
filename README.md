@@ -98,7 +98,7 @@ ex: i tried with luks to encrypt at rest with tpm2, but i didn't know the server
 Unfortunatly, most of the time a reinstallation is the only solution, since the ignition file is only executed once.
 
 ## Reinstalling CoreOS
-A good thing to know is to use `wipefs -af /dev/nvme0n1` to wipe each disks and reboot again to be sure to have clean disks and avoir the `device busy, unable to write` issue on installation.
+A good thing to know is to use `wipefs -af /dev/nvme0n1` to wipe each disks and reboot again to be sure to have clean disks and have the `device busy, unable to write` issue on installation.
 
 ## The installation of CoreOS was a success, but i can't SSH to it
 ### Custom SSH port is setup
