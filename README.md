@@ -74,7 +74,7 @@ So if someone who is smarter than me have the solution, let me know i'll gladly 
 
 > [!NOTE]
 > It can be any of the 2 disks it shouldn't change the installation process since we reconfigure coreos disks for a raid 1.
-> CoreOS will move it self in the ram and rewrite the disk it was initially installed on. [More Information](https://docs.fedoraproject.org/en-US/fedora-coreos/storage/
+> CoreOS will move it self in the ram and rewrite the disk it was initially installed on. [More Information](https://docs.fedoraproject.org/en-US/fedora-coreos/storage/)
 
 7. CoreOS Installation
     #_reconfiguring_the_root_filesystem)
