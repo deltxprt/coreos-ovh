@@ -28,18 +28,21 @@ So if someone who is smarter than me have the solution, let me know i'll gladly 
     1. At the "Status" section, Select the 3 dots icon
     2. click "Start"
 4. SSH into the machine using the key you setup in the rescue menu (step 2.2.1b)
+> [!NOTE]
+> i personnaly went with cargo installation, but it came with some hurdles because of missing packages on debian that i had to install bit by bit.
 5. Coreos-Installer installation
+
     1. Build from source 
         1. [Github](https://github.com/coreos/coreos-installer)
         2. [Getting started](https://github.com/coreos/coreos-installer/blob/main/docs/getting-started.md)
-        > [!NOTE]
-        > i personnaly went with cargo installation, but it came with some hurdles because of missing packages on debian that i had to install bit by bit.
         3. Using cargo
             1. run `curl https://sh.rustup.rs -sSf | sh`
             2. press enter for default installation
             3. then run `cargo install coreos-installer`
                 1. Each time it fails you need to install what is mentionned in the error (i'll try to redo an installation that will list the required packages soon)
             4. save the "coreos-installer" binary file it generated outside of the server (in case you need to reinstall coreos for some reason)
+> [!NOTE]
+> Don't take the disk ID with a `_1` at the end take the shortest name
 6. ignition/butane file setup
     1. Take the [config.bu](/config.bu) example file and drop it in your text editor
     2. We need to replace the following placeholders (ordered from top to bottom of the file):
@@ -51,8 +54,6 @@ So if someone who is smarter than me have the solution, let me know i'll gladly 
                 example for regular disks: `ls -l /dev/disk/by-id/ | grep '^.*sd[[:alpha:]]$'`
             2. Choose the one with the disk manufacturer name ex:
                 intel: nvme-INTEL_SSDPE2MX450G7_CVPF...RGN
-                > [!NOTE]
-                > Don't take the disk ID with a `_1` at the end take the shortest name
             3. Take note of the 2 disks IDs
             4. put those IDs in the follwing sections of the config.bu
                 1. `boot_devices.mirror.devices` (line 25)
@@ -67,13 +68,16 @@ So if someone who is smarter than me have the solution, let me know i'll gladly 
     3. Convert the `config.bu` file into an ignition file (`config.ign`) using [butane converter biany](https://github.com/coreos/butane/releases)
         ex: `butane --strict --pretty .\config.bu > config.ign`
     4. Copy the file or file content of `config.ign` to the server via SSH
-7. CoreOS Installation
-    > [!IMPORTANT]
-    > Don't forget to change the disk at the end, if needed.
 
-    > [!NOTE]
-    > It can be any of the 2 disks it shouldn't change the installation process since we reconfigure coreos disks for a raid 1.
-    > CoreOS will move it self in the ram and rewrite the disk it was initially installed on. [More Information](https://docs.fedoraproject.org/en-US/fedora-coreos/storage/#_reconfiguring_the_root_filesystem)
+> [!IMPORTANT]
+> Don't forget to change the disk at the end, if needed.
+
+> [!NOTE]
+> It can be any of the 2 disks it shouldn't change the installation process since we reconfigure coreos disks for a raid 1.
+> CoreOS will move it self in the ram and rewrite the disk it was initially installed on. [More Information](https://docs.fedoraproject.org/en-US/fedora-coreos/storage/
+
+7. CoreOS Installation
+    #_reconfiguring_the_root_filesystem)
     1. Execute the following command: `./coreos-installer install --stream "stable" --platform "metal" --ignition-file config.ign /dev/nvme0n1`
         2. wait until it's done
     2. In the OVH panel switch the rescue mode to local disk (Refer to step 2, if unsure)
