@@ -1,7 +1,7 @@
 # OVH coreos setup
 This is an example config for an OVH baremetal machine setup.
 
-I did many trial and error to find the good config for OVH server, it was a good puzzle to solve.
+I did many trials and errors to find the good config for OVH server, it was a good puzzle to solve.
 
 Also i tried to understand [BYOLinux](https://help.ovhcloud.com/csm/en-dedicated-servers-bring-your-own-linux?id=kb_article_view&sysparm_article=KB0061610)/[BYOImage](https://help.ovhcloud.com/csm/en-dedicated-servers-bringyourownimage?id=kb_article_view&sysparm_article=KB0043281), but my knowlege of partition modification and interaction from an iso/raw file is almost non existant. 
 
