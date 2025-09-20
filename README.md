@@ -39,8 +39,8 @@ So if someone who is smarter than me, have the solution, let me know i'll gladly
         3. Using cargo
             1. run `curl https://sh.rustup.rs -sSf | sh`
             2. press enter for default installation
+            3. Install the following packages: `sudo apt install build-essential libssl-dev pkg-config libzstd-dev`
             3. then run `cargo install coreos-installer`
-                1. Each time it fails you need to install what is mentionned in the error (i'll try to redo an installation that will list the required packages soon)
             4. save the "coreos-installer" binary file it generated outside of the server (in case you need to reinstall coreos for some reason)
 > [!NOTE]
 > Don't take the disk ID with a `_1` at the end take the shortest name
