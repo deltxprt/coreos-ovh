@@ -79,12 +79,13 @@ So if someone who is smarter than me, have the solution, let me know i'll gladly
 
 7. CoreOS Installation
     #_reconfiguring_the_root_filesystem)
-    1. Execute the following command: `./coreos-installer install --stream "stable" --platform "metal" --ignition-file config.ign /dev/nvme0n1`
+    1. Install required packages `apt install gnugp2`
+    2. Execute the following command: `./coreos-installer install --stream "stable" --platform "metal" --ignition-file config.ign /dev/nvme0n1`
         2. wait until it's done
-    2. In the OVH panel switch the rescue mode to local disk (Refer to step 2, if unsure)
+    3. In the OVH panel switch the rescue mode to local disk (Refer to step 2, if unsure)
         1. (Optional) use the IPMI/Java Applet to check the installation status of CoreOS
-    3. reboot the server
-8. Wait until it's done configuring the server and enjoy your public CoreOS server!
+    4. reboot the server
+9. Wait until it's done configuring the server and enjoy your public CoreOS server!
 
 # Troubleshootings
 
